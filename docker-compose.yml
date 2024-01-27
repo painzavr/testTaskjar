@@ -1,0 +1,30 @@
+version: '3'
+services:
+  postgresdocker:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: customers
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+    networks:
+      - linker
+    ports:
+      - "5432:5432"  # Expose PostgreSQL port to the host machine
+
+  botdocker:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgresdocker
+    environment:
+      # Use the container name of the PostgreSQL container as the hostname
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresdocker:5432/customers
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 123
+    networks:
+      - linker
+
+networks:
+  linker:
+    driver: bridge
